@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>No ADS YouTube</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+  }
+  #video-container {
+    max-width: 560px;
+    margin: 0 auto;
+  }
+  .fade-border {
+    transition: border 3s cubic-bezier(0.2, 0.25, 0.8, 1);
+  }
+  .rounded {
+    border-radius: 15px;
+  }
+  .video-links {
+    position: absolute;
+    left: 10px;
+    top: 10px;
+    text-align: left;
+  }
+  .video-link {
+    display: block;
+    margin-bottom: 10px;
+    cursor: pointer;
+  }
+</style>
+</head>
+<body>
+<h1>NoADS - Visor de YouTube sin anuncios</h1>
+<div class="video-links" id="video-links">
+  <!-- Enlaces se generarán aquí -->
+<img class="corner-image" src="https://assetsyoutuby.pablol5.repl.co/YoutubY.png" alt="YouTube Logo">
+</div>
+<div id="video-container">
+  <input type="text" id="video-id" placeholder="Mete un ID de un vídeo de YouTube. Ejemplo: 11FgIj24bMaSf">
+  <button onclick="loadVideo()">Cargar visor YouTube</button>
+  <button onclick="applyFadeEffect()">Aplicar Efecto de Borde</button>
+  <div id="embed-container" class="fade-border rounded"></div>
+</div>
+
+<script>
+  function generateRandomVideoId() {
+    const characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_";
+    let videoId = "";
+
+    for (let i = 0; i < 11; i++) {
+      const randomIndex = Math.floor(Math.random() * characters.length);
+      videoId += characters[randomIndex];
+    }
+
+    return videoId;
+  }
+
+  function isVideoValid(videoId, callback) {
+    const img = new Image();
+    img.onload = function() {
+      callback(true);
+    };
+    img.onerror = function() {
+      callback(false);
+    };
+    img.src = "https://img.youtube.com/vi/" + videoId + "/0.jpg";
+  }
+
+  function loadRandomVideos() {
+    const videoLinksContainer = document.getElementById("video-links");
+    
+    for (let i = 0; i < 20; i++) {
+      const randomVideoId = generateRandomVideoId();
+      
+      const videoLink = document.createElement("a");
+      videoLink.className = "video-link";
+      videoLink.textContent = "Cargar Video Aleatorio " + (i + 1);
+      videoLink.onclick = function() {
+        loadVideoById(randomVideoId);
+      };
+      
+      videoLinksContainer.appendChild(videoLink);
+    }
+  }
+
+  function loadVideoById(videoId) {
+    const embedContainer = document.getElementById("embed-container");
+    const embedCode = '<iframe width="560" height="315" src="https://www.youtube.com/embed/' + videoId + '" frameborder="0" allowfullscreen></iframe>';
+    embedContainer.innerHTML = embedCode;
+
+    fetch("https://www.googleapis.com/youtube/v3/videos?id=" + videoId + "&key=YOUR_YOUTUBE_API_KEY&part=snippet")
+      .then(response => response.json())
+      .then(data => {
+        const videoTitle = data.items[0].snippet.title;
+        alert("Título del video: " + videoTitle);
+      })
+      .catch(error => {
+        console.error("Error al obtener el título del video: ", error);
+      });
+  }
+
+  function loadVideo() {
+    const videoId = document.getElementById("video-id").value;
+    const embedContainer = document.getElementById("embed-container");
+    
+    if (videoId) {
+      const embedCode = '<iframe width="560" height="315" src="https://www.youtube.com/embed/' + videoId + '" frameborder="0" allowfullscreen></iframe>';
+      embedContainer.innerHTML = embedCode;
+    } else {
+      embedContainer.innerHTML = "Por favor, mete un ID de YouTube válido. Ejemplo: dQw4w9WgXcQ";
+    }
+  }
+
+  function applyFadeEffect() {
+    const iframe = document.querySelector("iframe");
+    iframe.style.transitionTimingFunction = "cubic-bezier(0.4, 0, 0.6, 1)";
+    iframe.style.transitionDuration = "3s";
+    iframe.style.borderRadius = "15px";
+
+    setTimeout(() => {
+      iframe.style.transition = "none"; // Elimina la transición
+      iframe.style.borderRadius = "15px";
+    }, 3000);
+  }
+
+  // Carga los enlaces de video aleatorio al cargar la página
+  loadRandomVideos();
+</script>
+</body>
+</html>
